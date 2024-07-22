@@ -1,125 +1,185 @@
-import 'package:flutter/material.dart';
+import'package:flutter/material.dart';
 
-void main() {
+void main(){
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'TIC TAC TOE',
+
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home:  const TicTacToe(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class TicTacToe extends StatefulWidget {
+  const TicTacToe({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<TicTacToe> createState() => _TicTacToeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _TicTacToeState extends State<TicTacToe> {
+  List<List<String>> board = List.generate(3, (_) => List.filled(3, ''));
 
-  void _incrementCounter() {
+  bool xTurn = true;
+
+  String winner = '';
+
+  void _onTileTap(int row, int col) {
+    if (board[row][col] != '' || winner != '') return;
+
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      board[row][col] = xTurn ? 'X' : 'O';
+      xTurn = !xTurn;
+      winner = _checkWinner();
+    });
+  }
+
+  String _checkWinner() {
+    for (int i = 0; i < 3; i++) {
+      if (board[i][0] != '' &&
+          board[i][0] == board[i][1] &&
+          board[i][1] == board[i][2]) {
+        return board[i][0];
+      }
+      if (board[0][1] != '' &&
+          board[0][1] == board[1][i] &&
+          board[1][i] == board[2][i]) {
+        return board[0][i];
+      }
+    }
+
+    if (board[0][0] != '' &&
+        board[0][0] == board[1][1] &&
+        board[1][1] == board[2][2]) {
+      return board[0][0];
+    }
+    if (board[0][2] != '' &&
+        board[0][2] == board[1][1] &&
+        board[1][1] == board[2][0]) {
+      return board[0][2];
+    }
+    //checking for a draw condition
+
+    if (!board.any((row) => row.any((cell) => cell == ''))) {
+      return 'Draw';
+    }
+    return '';
+  }
+
+  void _resetGame() {
+    setState(() {
+      board = List.generate(3, (_) => List.filled(3, ''));
+      xTurn = true;
+      winner = '';
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text('Tic Tac Toe', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30, color: Colors.teal)),
+          centerTitle: true
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+
+
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            winner == ''
+                ? (xTurn ? 'X\'s turn' : 'O\'s turn')
+                : winner == 'Draw'
+                ? 'It \'s a Draw'
+            
+                : 'winner : $winner',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Center(
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3),
+                  itemCount: 9,
+                  itemBuilder: (context, index) {
+                    int row = index ~/ 3;
+                    int col = index % 3;
+
+                    return GestureDetector(
+                      onTap: () => _onTileTap(row, col),
+                      child: Container(
+                          decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Colors.purple, Colors.blue],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomLeft,
+                              ),
+                              border: Border.all(color: Colors.transparent),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black26),
+                              ]),
+                          margin: const EdgeInsets.all(4),
+                          child: Center(
+                            child: Text(
+                              board[row][col],
+                              style: const TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                        blurRadius: 10.0,
+                                        color: Colors.black26,
+                                        offset: Offset(2, 2))
+                                  ]),
+                            ),
+                          )),
+                    );
+                  }),
             ),
-          ],
-        ),
+          ),
+
+          const SizedBox(height: 20,),
+
+          ElevatedButton(
+            onPressed: _resetGame,
+            style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 20,
+                ),
+                shape:   StadiumBorder(),
+
+
+
+            ),
+            child: const Text('Reset Game',style: TextStyle(fontSize: 40),),
+          )
+
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
